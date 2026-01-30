@@ -22,7 +22,7 @@ public class SkillService {
     public Skill create(CreateSkillDTO dto){
 
         Category category = categoryRepo.findById(dto.getCategoryId())
-                .orElseThrow(()-> new RuntimeException("Not found"));
+                .orElseThrow(()-> new RuntimeException("No Category found"));
 
         Skill skill = new Skill();
         skill.setSkillName(dto.getSkillName());

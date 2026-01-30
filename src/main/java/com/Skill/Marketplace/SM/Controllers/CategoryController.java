@@ -3,7 +3,6 @@ import com.Skill.Marketplace.SM.DTO.categoryDTO.CategoryResponseDTO;
 import com.Skill.Marketplace.SM.DTO.categoryDTO.CreateCategoryDTO;
 import com.Skill.Marketplace.SM.DTO.categoryDTO.UpdateCategoryDTO;
 import com.Skill.Marketplace.SM.Entities.Category;
-import com.Skill.Marketplace.SM.Mapper.CategoryMapper;
 import com.Skill.Marketplace.SM.Services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,35 +18,59 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private CategoryMapper categoryMapper;
+
 
     @PostMapping
-    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody CreateCategoryDTO dto){
-        return ResponseEntity.ok(categoryMapper.toResponse(categoryService.create(dto)) );
+    public ResponseEntity<?> createCategory(@RequestBody CreateCategoryDTO request){
+
+        Category savedCategory = categoryService.create(request);
+
+        return ResponseEntity.ok(
+                new CategoryResponseDTO(
+                        savedCategory.getCategoryId(),
+                        savedCategory.getCategoryName()
+                )
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Long id , @RequestBody UpdateCategoryDTO dto){
-        return ResponseEntity.ok(categoryMapper.toResponse(categoryService.update(id, dto)));
+    public ResponseEntity<?> updateCategory(@PathVariable Long id , @RequestBody UpdateCategoryDTO dto){
+
+        categoryService.update(id, dto);
+
+        return ResponseEntity.ok(
+                new CategoryResponseDTO(
+                        id,
+                        dto.getCategoryName()
+                )
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Long id){
-        return ResponseEntity.ok(categoryMapper.toResponse(categoryService.getById(id)));
+    public ResponseEntity<?> getCategoryById(@PathVariable Long id){
+            Category category = categoryService.getById(id);
+        return ResponseEntity.ok(
+                new CategoryResponseDTO(
+                        category.getCategoryId(),
+                        category.getCategoryName()
+                )
+        );
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories(){
+    public ResponseEntity<?> getAllCategories(){
         List<Category> categories = categoryService.getAll();
-        List<CategoryResponseDTO> response = categories.stream()
-                .map(categoryMapper::toResponse)
-                .toList();
+        List<CategoryResponseDTO> response  = categories.stream().map(
+                category -> new CategoryResponseDTO(
+                        category.getCategoryId(),
+                        category.getCategoryName()
+                )
+        ).toList();
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id){
+    public ResponseEntity<?> deleteCategoryById(@PathVariable Long id){
          categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -14,5 +14,11 @@ spring:
   flyway:
     enabled: false
 
-#  autoconfigure:
-#    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+
+jwt:
+  secret: manidontknowmyownsecretkeyanymore12345
+  expiration: 3600000
+
+
+

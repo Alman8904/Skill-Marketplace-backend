@@ -5,6 +5,8 @@ import com.Skill.Marketplace.SM.Entities.UserModel;
 import com.Skill.Marketplace.SM.Repo.SkillsRepo;
 import com.Skill.Marketplace.SM.Repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authorization.method.AuthorizeReturnObject;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class UserService {
     private UserRepo userRepo;
 
     @Autowired
-    private SkillsRepo skillsRepo;
+    private PasswordEncoder passwordEncoder;
 
     public UserModel createNewUser(CreateUserDTO dto){
 
@@ -24,7 +26,7 @@ public class UserService {
         user.setUsername(dto.getUsername());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setUserType(dto.getUserType());
 
         return userRepo.save(user);

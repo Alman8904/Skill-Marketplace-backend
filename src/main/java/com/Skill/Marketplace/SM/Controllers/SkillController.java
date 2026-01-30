@@ -1,9 +1,9 @@
 package com.Skill.Marketplace.SM.Controllers;
+import com.Skill.Marketplace.SM.DTO.categoryDTO.CategoryResponseDTO;
 import com.Skill.Marketplace.SM.DTO.skillDTO.CreateSkillDTO;
 import com.Skill.Marketplace.SM.DTO.skillDTO.SkillResponseDTO;
 import com.Skill.Marketplace.SM.DTO.skillDTO.UpdateSkillDTO;
 import com.Skill.Marketplace.SM.Entities.Skill;
-import com.Skill.Marketplace.SM.Mapper.SkillMapper;
 import com.Skill.Marketplace.SM.Services.SkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,35 +17,68 @@ public class SkillController {
     @Autowired
     private SkillService skillService;
 
-    @Autowired
-    private SkillMapper skillMapper;
+
 
     @PostMapping
-    public ResponseEntity<SkillResponseDTO> createSkill(@RequestBody CreateSkillDTO dto){
-        return ResponseEntity.ok(skillMapper.toResponse(skillService.create(dto)));
+    public ResponseEntity<?> createSkill(@RequestBody CreateSkillDTO dto){
+        Skill savedSkill = skillService.create(dto);
+        return ResponseEntity.ok(
+                new SkillResponseDTO(
+                        savedSkill.getId(),
+                        savedSkill.getSkillName(),
+                        savedSkill.getCategory() != null ? new CategoryResponseDTO(
+                                savedSkill.getCategory().getCategoryId(),
+                                savedSkill.getCategory().getCategoryName()
+                        ) : null
+                )
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SkillResponseDTO> updateSkill(@PathVariable Long id , @RequestBody UpdateSkillDTO dto){
-        return ResponseEntity.ok(skillMapper.toResponse(skillService.update(id, dto)));
+    public ResponseEntity<?> updateSkill(@PathVariable Long id , @RequestBody UpdateSkillDTO dto){
+        skillService.update(id, dto);
+        return ResponseEntity.ok(
+                new SkillResponseDTO(
+                        id,
+                        dto.getSkillName(),
+                        null
+                )
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SkillResponseDTO> getSkillById(@PathVariable Long id){
-        return ResponseEntity.ok(skillMapper.toResponse(skillService.getById(id)));
+    public ResponseEntity<?> getSkillById(@PathVariable Long id){
+        Skill skill = skillService.getById(id);
+        return ResponseEntity.ok(
+                new SkillResponseDTO(
+                        skill.getId(),
+                        skill.getSkillName(),
+                        skill.getCategory() != null ? new CategoryResponseDTO(
+                                skill.getCategory().getCategoryId(),
+                                skill.getCategory().getCategoryName()
+                        ) : null
+                )
+        );
     }
 
     @GetMapping
-    public ResponseEntity<List<SkillResponseDTO>> getAllSkills(){
+    public ResponseEntity<?> getAllSkills(){
         List<Skill> categories = skillService.getAll();
-        List<SkillResponseDTO> response = categories.stream()
-                .map(skillMapper::toResponse)
-                .toList();
+        List<SkillResponseDTO> response =  categories.stream().map(
+                skill -> new SkillResponseDTO(
+                        skill.getId(),
+                        skill.getSkillName(),
+                        skill.getCategory() != null ? new CategoryResponseDTO(
+                                skill.getCategory().getCategoryId(),
+                                skill.getCategory().getCategoryName()
+                        ) : null
+                )
+        ).toList();
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSkillById(@PathVariable Long id){
+    public ResponseEntity<?> deleteSkillById(@PathVariable Long id){
         skillService.delete(id);
         return ResponseEntity.noContent().build();
     }
