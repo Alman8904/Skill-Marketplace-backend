@@ -1,13 +1,18 @@
 package com.Skill.Marketplace.SM.Services;
-import com.Skill.Marketplace.SM.DTO.userDTO.AssignSkillDTO;
+import com.Skill.Marketplace.SM.DTO.UserSkillDTO.updateUserSkillDTO;
+import com.Skill.Marketplace.SM.DTO.UserSkillDTO.AssignSkillDTO;
 import com.Skill.Marketplace.SM.Entities.Skill;
 import com.Skill.Marketplace.SM.Entities.UserModel;
 import com.Skill.Marketplace.SM.Entities.UserSkill;
+import com.Skill.Marketplace.SM.Entities.UserType;
 import com.Skill.Marketplace.SM.Repo.SkillsRepo;
 import com.Skill.Marketplace.SM.Repo.UserRepo;
 import com.Skill.Marketplace.SM.Repo.UserSkillRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserSkillService {
@@ -21,22 +26,69 @@ public class UserSkillService {
     @Autowired
     private SkillsRepo skillsRepo;
 
-    public Void assignSkills(String username, AssignSkillDTO dto){
+    @Transactional
+    public void assignSkills(String username, AssignSkillDTO dto) {
 
         UserModel user = userRepo.getUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        for (Long skillId : dto.getSkillIds()) {
+        if (user.getUserType() == UserType.CONSUMER) {
+            throw new RuntimeException("Consumers cannot offer skills");
+        }
 
-            Skill skill = skillsRepo.findById(skillId)
-                    .orElseThrow(() -> new RuntimeException("No skills found"));
+        for (AssignSkillDTO.SkillData skillData : dto.getSkills()) {
+
+            Skill skill = skillsRepo.findById(skillData.getSkillId())
+                    .orElseThrow(() -> new RuntimeException("Skill not found"));
 
             UserSkill userSkill = new UserSkill();
             userSkill.setUser(user);
             userSkill.setSkill(skill);
+            userSkill.setDescription(skillData.getDescription());
+            userSkill.setRate(skillData.getRate());
+            userSkill.setExperience(skillData.getExperience());
+            userSkill.setServiceMode(skillData.getServiceMode());
+            userSkill.setActive(true);
 
             userSkillRepo.save(userSkill);
         }
-        return null;
     }
+
+    @Transactional
+    public void deactivateUserSkill(Long userSkillId, String username) {
+        UserSkill userSkill = userSkillRepo.findById(userSkillId)
+                .orElseThrow(() -> new RuntimeException("UserSkill not found"));
+
+        if (!userSkill.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized to deactivate this skill");
+        }
+
+        userSkill.setActive(false);
+        userSkillRepo.save(userSkill);
+    }
+
+    @Transactional
+    public void updateUserSkill(Long userSkillId, String username, updateUserSkillDTO skillData) {
+        UserSkill userSkill = userSkillRepo.findById(userSkillId)
+                .orElseThrow(() -> new RuntimeException("UserSkill not found"));
+
+        if (!userSkill.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Unauthorized to update this skill");
+        }
+
+        userSkill.setDescription(skillData.getDescription());
+        userSkill.setRate(skillData.getRate());
+        userSkill.setExperience(skillData.getExperience());
+        userSkill.setServiceMode(skillData.getServiceMode());
+
+        userSkillRepo.save(userSkill);
+    }
+
+    public List<UserSkill> getSkillsByUser(String username) {
+        UserModel user = userRepo.getUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return userSkillRepo.findByUser(user);
+    }
+
 }

@@ -9,15 +9,28 @@ public class UserSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userSkillId;
-    private String skillLevel;
+
+    @Column(nullable = false , length = 100)
+    private String description;
+
+    @Column(nullable = false)
     private double rate;
-    private double experience;
+
+    @Column(nullable = false)
+    private int experience;
+
+    @Column(nullable = false)
+    private boolean isActive;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ServiceMode serviceMode;
 
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name="user_id", nullable = false)
     private UserModel user;
 
     @ManyToOne
-    @JoinColumn(name="skill_id")
+    @JoinColumn(name="skill_id", nullable = false)
     private Skill skill;
 }
