@@ -20,7 +20,7 @@ public class UserSkill {
     private int experience;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean isActive=true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

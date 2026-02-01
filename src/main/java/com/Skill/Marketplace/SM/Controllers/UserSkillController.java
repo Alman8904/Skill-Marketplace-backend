@@ -1,6 +1,8 @@
 package com.Skill.Marketplace.SM.Controllers;
+import com.Skill.Marketplace.SM.DTO.SearchDTO.searchResultDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.updateUserSkillDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.AssignSkillDTO;
+import com.Skill.Marketplace.SM.Entities.UserSkill;
 import com.Skill.Marketplace.SM.Services.UserSkillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user-skills")
@@ -52,4 +56,23 @@ public class UserSkillController {
     }
 
 
+    @PreAuthorize("hasAnyRole('CONSUMER','PROVIDER')" )
+    @GetMapping("/search")
+    public List<searchResultDTO> searchProviders(@RequestParam String skill) {
+
+        List<UserSkill> results = userSkillService.searchProvidersBySkill(skill);
+
+        return results.stream()
+                .map(userSkill -> new searchResultDTO(
+                        userSkill.getUser().getId(),
+                        userSkill.getUser().getUsername(),
+                        userSkill.getSkill().getSkillName(),
+                        userSkill.getRate(),
+                        userSkill.getDescription(),
+                        userSkill.getExperience(),
+                        userSkill.getServiceMode().name()
+                ))
+                .toList();
+    }
 }
+

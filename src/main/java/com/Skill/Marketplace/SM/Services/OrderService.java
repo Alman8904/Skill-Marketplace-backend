@@ -27,26 +27,22 @@ public class OrderService {
     private OrderRepo orderRepo;
 
     public Order placeOrder(String username , createOrderDTO orderDTO) {
-        UserModel consumer = userRepo.getUserByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Consumer not found"));
 
-        if(consumer.getUserType() != UserType.CONSUMER) {
-            throw new RuntimeException("Only consumers can place orders");
-        }
+        UserModel consumer = userRepo.getUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         UserModel provider = userRepo.findById(orderDTO.getProviderId())
                 .orElseThrow(() -> new RuntimeException("Provider not found"));
 
-        if (provider.getUserType() == UserType.CONSUMER) {
-            throw new RuntimeException("This user does not offer services");
+        if (consumer.getId().equals(provider.getId())) {
+            throw new RuntimeException("You cannot order your own service");
         }
 
-        Skill skill =  skillsRepo.findById(orderDTO.getSkillId())
+        Skill skill = skillsRepo.findById(orderDTO.getSkillId())
                 .orElseThrow(() -> new RuntimeException("Skill not found"));
 
-        UserSkill listing = userSkillRepo.findByUserAndSkill(provider , skill)
+        UserSkill listing = userSkillRepo.findByUserAndSkill(provider, skill)
                 .orElseThrow(() -> new RuntimeException("Provider does not offer this skill"));
-
 
         Order order = new Order();
         order.setConsumer(consumer);
@@ -59,6 +55,7 @@ public class OrderService {
 
         return orderRepo.save(order);
     }
+
 
     @Transactional
     public void acceptOrder(Long orderId, String username) {

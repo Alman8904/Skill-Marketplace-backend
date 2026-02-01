@@ -1,4 +1,5 @@
 package com.Skill.Marketplace.SM.Services;
+import com.Skill.Marketplace.SM.DTO.SearchDTO.searchResultDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.updateUserSkillDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.AssignSkillDTO;
 import com.Skill.Marketplace.SM.Entities.Skill;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class UserSkillService {
@@ -90,5 +93,11 @@ public class UserSkillService {
 
         return userSkillRepo.findByUser(user);
     }
+
+    public List<UserSkill> searchProvidersBySkill(String skillName) {
+        return userSkillRepo.searchBySkillName(skillName);
+    }
+
+
 
 }

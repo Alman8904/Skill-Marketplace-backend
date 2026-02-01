@@ -17,7 +17,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PreAuthorize("hasRole('CONSUMER')")
+    @PreAuthorize("hasRole('CONSUMER') or hasRole('PROVIDER')")
     @PostMapping("/place")
     public ResponseEntity<?> placeOrder(@RequestBody createOrderDTO orderDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
