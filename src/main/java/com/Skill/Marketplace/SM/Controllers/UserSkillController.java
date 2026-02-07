@@ -2,6 +2,7 @@ package com.Skill.Marketplace.SM.Controllers;
 import com.Skill.Marketplace.SM.DTO.SearchDTO.searchResultDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.updateUserSkillDTO;
 import com.Skill.Marketplace.SM.DTO.UserSkillDTO.AssignSkillDTO;
+import com.Skill.Marketplace.SM.Entities.ServiceMode;
 import com.Skill.Marketplace.SM.Entities.UserSkill;
 import com.Skill.Marketplace.SM.Services.UserSkillService;
 import jakarta.validation.Valid;
@@ -63,20 +64,28 @@ public class UserSkillController {
 
     @PreAuthorize("hasAnyRole('CONSUMER','PROVIDER')" )
     @GetMapping("/search")
-    public ResponseEntity<?> searchProviders(@RequestParam String skill , @PageableDefault(size = 10,sort="rate")Pageable pageable){
+    public ResponseEntity<?> searchProviders(
+            @RequestParam String skill,
+            @RequestParam(required = false) Double minRate,
+            @RequestParam(required = false) Double maxRate,
+            @RequestParam(required = false) ServiceMode serviceMode,
+            @RequestParam(required = false) Integer minExperience,
+            @PageableDefault(size = 10, sort = "rate") Pageable pageable
+    ) {
+        Page<UserSkill> page = userSkillService.searchProvidersBySkill(
+                skill, minRate, maxRate, serviceMode, minExperience, pageable
+        );
 
-        Page<UserSkill> page = userSkillService.searchProvidersBySkill(skill,pageable);
-
-        Page<searchResultDTO> dtoPage = page.map(userSkill -> new searchResultDTO(
-                userSkill.getUser().getId(),
-                userSkill.getUser().getUsername(),
-                userSkill.getSkill().getSkillName(),
-                userSkill.getRate(),
-                userSkill.getDescription(),
-                userSkill.getExperience(),
-                userSkill.getServiceMode().name()
-        ));
-        return ResponseEntity.ok(dtoPage);
+        return ResponseEntity.ok(page.map(us -> new searchResultDTO(
+                us.getUser().getId(),
+                us.getUser().getUsername(),
+                us.getSkill().getSkillName(),
+                us.getRate(),
+                us.getDescription(),
+                us.getExperience(),
+                us.getServiceMode().name()
+        )));
     }
+
 }
 
