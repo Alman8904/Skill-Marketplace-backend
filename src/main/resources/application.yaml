@@ -3,24 +3,26 @@ spring:
     name: SM
 
   datasource:
-    url: jdbc:postgresql://localhost:8000/SM
-    username: postgres
-    password: 890400
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
+
 
   flyway:
-    enabled: false
-    baseline-on-migrate: false
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
 
 jwt:
-  secret: manidontknowmyownsecretkeyanymore12345
-  expiration: 3600000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:3600000}
 
 app:
   admin:
-    username: ${ADMIN_USERNAME:admin}
-    password: ${ADMIN_PASSWORD:admin123}
-    email: ${ADMIN_EMAIL:admin@mail.com}
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}
