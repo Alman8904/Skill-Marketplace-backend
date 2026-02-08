@@ -24,6 +24,9 @@ public class UserModel {
     @Enumerated(EnumType.STRING)
     private UserType userType;
 
+    @Column(nullable = false)
+    private double walletBalance = 0.0;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<UserSkill> userSkills;
