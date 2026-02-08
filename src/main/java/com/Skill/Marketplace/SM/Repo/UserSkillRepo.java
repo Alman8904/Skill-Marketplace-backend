@@ -14,7 +14,8 @@ public interface UserSkillRepo extends JpaRepository<UserSkill, Long> {
 
     List<UserSkill> findByUser(UserModel user);
 
-    Optional<UserSkill> findByUserAndSkill(UserModel user, Skill skill);
+    Optional<UserSkill> findByUserAndSkillAndIsActiveTrue(UserModel user, Skill skill);
+
 
 
     @Query("""

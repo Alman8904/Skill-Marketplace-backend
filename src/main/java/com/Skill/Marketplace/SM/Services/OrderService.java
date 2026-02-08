@@ -45,7 +45,7 @@ public class OrderService {
         Skill skill = skillsRepo.findById(orderDTO.getSkillId())
                 .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
 
-        UserSkill listing = userSkillRepo.findByUserAndSkill(provider, skill)
+        UserSkill listing = userSkillRepo.findByUserAndSkillAndIsActiveTrue(provider, skill)
                 .orElseThrow(() -> new BadRequestException("Provider does not offer this skill"));
 
         Order order = new Order();

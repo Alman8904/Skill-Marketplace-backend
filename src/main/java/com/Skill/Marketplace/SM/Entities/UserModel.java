@@ -1,4 +1,5 @@
 package com.Skill.Marketplace.SM.Entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -23,6 +24,7 @@ public class UserModel {
     @Enumerated(EnumType.STRING)
     private UserType userType;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<UserSkill> userSkills;
 
