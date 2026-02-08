@@ -14,4 +14,7 @@ public class createOrderDTO {
     @NotBlank(message = "Description is required")
     @Size(min = 10, max = 500)
     private String description;
+    @NotNull(message = "Estimated Hours is required")
+    private Integer estimatedHours;
+
 }

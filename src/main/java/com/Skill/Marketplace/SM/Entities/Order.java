@@ -34,6 +34,10 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    private Integer estimatedHours; // Consumer
+    private LocalDateTime deadline; // Provider
+
+
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
 
@@ -41,7 +45,7 @@ public class Order {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = OrderStatus.PENDING;
+            status = OrderStatus.PAYMENT_PENDING;
         }
     }
 }

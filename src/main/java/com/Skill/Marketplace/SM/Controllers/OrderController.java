@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -42,9 +44,11 @@ public class OrderController {
 
     @PreAuthorize("hasRole('PROVIDER')")
     @PostMapping("/accept")
-    public ResponseEntity<?> acceptOrder(@RequestParam Long orderId) {
+    public ResponseEntity<?> acceptOrder(@RequestParam Long orderId, @RequestParam String deadline) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        orderService.acceptOrder(orderId, username);
+
+        LocalDateTime date = LocalDateTime.parse(deadline);
+        orderService.acceptOrder(orderId, username, date);
         return ResponseEntity.noContent().build();
     }
 
@@ -60,11 +64,11 @@ public class OrderController {
     }
 
     @PreAuthorize("hasRole('PROVIDER')")
-    @PostMapping("/complete")
-    public ResponseEntity<?> completeOrder(@RequestParam Long orderId) {
+    @PostMapping("/deliver")
+    public ResponseEntity<?> deliverOrder(@RequestParam Long orderId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        orderService.completeOrder(orderId, username);
+        orderService.deliverOrder(orderId, username);
 
         return ResponseEntity.noContent().build();
     }

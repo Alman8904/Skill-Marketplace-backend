@@ -48,21 +48,25 @@ public class OrderService {
         UserSkill listing = userSkillRepo.findByUserAndSkillAndIsActiveTrue(provider, skill)
                 .orElseThrow(() -> new BadRequestException("Provider does not offer this skill"));
 
+        if(orderDTO.getEstimatedHours() <= 0) {
+            throw new BadRequestException("Estimated hours must be greater than zero");
+        }
+
         Order order = new Order();
         order.setConsumer(consumer);
         order.setProvider(provider);
         order.setSkill(skill);
         order.setDescription(orderDTO.getDescription());
-        order.setAgreedPrice(listing.getRate());
-        order.setStatus(OrderStatus.PENDING);
-        order.setCreatedAt(LocalDateTime.now());
+        order.setEstimatedHours(orderDTO.getEstimatedHours());
+        order.setAgreedPrice(listing.getRate()*orderDTO.getEstimatedHours());
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
 
         return orderRepo.save(order);
     }
 
 
     @Transactional
-    public void acceptOrder(Long orderId, String username) {
+    public void acceptOrder(Long orderId, String username, LocalDateTime deadline) {
         Order order = orderRepo.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -70,26 +74,29 @@ public class OrderService {
             throw new ForbiddenException("Not authorized");
 
         if(order.getStatus() != OrderStatus.PENDING)
-            throw new ConflictException("Order already processed");
+            throw new ConflictException("Order is not ready for acceptance");
 
+        if(deadline.isBefore(LocalDateTime.now().plusHours(1)))
+            throw new BadRequestException("Deadline must be at least 1 hour from now");
+
+        order.setDeadline(deadline);
         order.setStatus(OrderStatus.ACCEPTED);
+        orderRepo.save(order);
     }
 
     @Transactional
-    public void completeOrder(Long orderId, String username) {
+    public void deliverOrder(Long orderId, String username) {
         Order order = orderRepo.findById(orderId).orElseThrow();
 
-        Order existingOrder = orderRepo.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
         if (!order.getProvider().getUsername().equals(username))
-            throw new ResourceNotFoundException("Not authorized");
+            throw new ForbiddenException("Not authorized");
 
         if(order.getStatus() != OrderStatus.ACCEPTED)
             throw new ConflictException("Order must be accepted first");
 
-        order.setStatus(OrderStatus.COMPLETED);
+        order.setStatus(OrderStatus.DELIVERED);
         order.setCompletedAt(LocalDateTime.now());
+        orderRepo.save(order);
 
     }
 

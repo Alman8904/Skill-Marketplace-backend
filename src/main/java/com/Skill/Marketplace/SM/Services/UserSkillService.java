@@ -7,10 +7,10 @@ import com.Skill.Marketplace.SM.Exception.ResourceNotFoundException;
 import com.Skill.Marketplace.SM.Repo.SkillsRepo;
 import com.Skill.Marketplace.SM.Repo.UserRepo;
 import com.Skill.Marketplace.SM.Repo.UserSkillRepo;
-import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +96,8 @@ public class UserSkillService {
         return userSkillRepo.findByUser(user);
     }
 
+
+
     public Page<UserSkill> searchProvidersBySkill(
             String skill,
             Double minRate,
@@ -105,10 +107,10 @@ public class UserSkillService {
             Pageable pageable
     ) {
         Page<UserSkill> page =
-                userSkillRepo.findBySkill_SkillNameContainingIgnoreCase(skill, pageable);
+                userSkillRepo.searchBySkill(skill, pageable);
 
         List<UserSkill> filtered = page.getContent().stream()
-                .filter(UserSkill::isActive)
+                .filter(us->us.isActive())
                 .filter(us -> minRate == null || us.getRate() >= minRate)
                 .filter(us -> maxRate == null || us.getRate() <= maxRate)
                 .filter(us -> serviceMode == null || us.getServiceMode() == serviceMode)
@@ -117,5 +119,4 @@ public class UserSkillService {
 
         return new PageImpl<>(filtered, pageable, page.getTotalElements());
     }
-
-}
+    }
