@@ -72,6 +72,10 @@ public class UserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
+        if(request.getPassword()!=null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
         if (request.getUserType() == UserType.ADMIN) {
             throw new BadRequestException("Cannot update user to ADMIN role");
         } else {

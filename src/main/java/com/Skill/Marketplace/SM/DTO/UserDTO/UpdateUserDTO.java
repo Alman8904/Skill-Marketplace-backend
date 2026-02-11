@@ -9,10 +9,6 @@ import lombok.Data;
 @Data
 public class UpdateUserDTO {
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50)
-    private String username;
-    @NotBlank(message = "Password is required")
     @Size(min = 8)
     private String password;
     private String firstName;
