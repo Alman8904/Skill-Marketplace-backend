@@ -3,6 +3,7 @@ package com.Skill.Marketplace.SM.DTO.UserSkillDTO;
 import com.Skill.Marketplace.SM.Entities.ServiceMode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -14,11 +15,11 @@ public class UpdateUserSkillDTO {
     private String description;
 
     @NotNull
-    @Size(min = 0, message = "Rate must be non-negative")
+    @PositiveOrZero(message = "Rate must be a positive number")
     private double rate;
 
     @NotNull
-    @Size(min = 0, message = "Experience must be non-negative")
+    @PositiveOrZero(message = "Experience must be a positive number")
     private int experience;
 
     @NotNull(message = "Service mode is required")
