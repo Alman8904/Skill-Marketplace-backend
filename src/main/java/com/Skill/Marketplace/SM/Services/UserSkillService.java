@@ -12,7 +12,6 @@ import com.Skill.Marketplace.SM.Repo.UserRepo;
 import com.Skill.Marketplace.SM.Repo.UserSkillRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,24 +118,9 @@ public class UserSkillService {
     }
 
     public Page<UserSkill> searchProvidersBySkill(
-            String skill,
-            Double minRate,
-            Double maxRate,
-            ServiceMode serviceMode,
-            Integer minExperience,
-            Pageable pageable
-    ) {
-        Page<UserSkill> page =
-                userSkillRepo.searchBySkill(skill, pageable);
+            String skill, Double minRate, Double maxRate,
+            ServiceMode serviceMode, Integer minExperience, Pageable pageable) {
 
-        List<UserSkill> filtered = page.getContent().stream()
-                .filter(us -> us.isActive())
-                .filter(us -> minRate == null || us.getRate() >= minRate)
-                .filter(us -> maxRate == null || us.getRate() <= maxRate)
-                .filter(us -> serviceMode == null || us.getServiceMode() == serviceMode)
-                .filter(us -> minExperience == null || us.getExperience() >= minExperience)
-                .toList();
-
-        return new PageImpl<>(filtered, pageable, page.getTotalElements());
+        return userSkillRepo.searchBySkill(skill, minRate, maxRate, serviceMode, minExperience, pageable);
     }
 }

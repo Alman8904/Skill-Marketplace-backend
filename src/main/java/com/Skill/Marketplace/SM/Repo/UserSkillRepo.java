@@ -1,5 +1,6 @@
 package com.Skill.Marketplace.SM.Repo;
 
+import com.Skill.Marketplace.SM.Entities.ServiceMode;
 import com.Skill.Marketplace.SM.Entities.Skill;
 import com.Skill.Marketplace.SM.Entities.UserModel;
 import com.Skill.Marketplace.SM.Entities.UserSkill;
@@ -18,12 +19,24 @@ public interface UserSkillRepo extends JpaRepository<UserSkill, Long> {
     Optional<UserSkill> findByUserAndSkillAndIsActiveTrue(UserModel user, Skill skill);
 
     @Query("""
-                SELECT us FROM UserSkill us
-                JOIN us.skill s
-                JOIN us.user u
-                WHERE LOWER(s.skillName) LIKE LOWER(CONCAT('%', :skillName, '%'))
-            """)
-    Page<UserSkill> searchBySkill(String skillName, Pageable pageable);
+    SELECT us FROM UserSkill us
+    JOIN us.skill s
+    JOIN us.user u
+    WHERE LOWER(s.skillName) LIKE LOWER(CONCAT('%', :skillName, '%'))
+    AND us.isActive = true
+    AND (:minRate IS NULL OR us.rate >= :minRate)
+    AND (:maxRate IS NULL OR us.rate <= :maxRate)
+    AND (:serviceMode IS NULL OR us.serviceMode = :serviceMode)
+    AND (:minExperience IS NULL OR us.experience >= :minExperience)
+""")
+    Page<UserSkill> searchBySkill(
+            String skillName,
+            Double minRate,
+            Double maxRate,
+            ServiceMode serviceMode,
+            Integer minExperience,
+            Pageable pageable
+    );
 
 
 }
