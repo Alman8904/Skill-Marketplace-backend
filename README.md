@@ -2,12 +2,7 @@
 
 A **reputation-based freelancing platform** REST API built with Spring Boot. Consumers hire providers for specific skills, payments are held in escrow until work is approved, and every user builds a public trust profile automatically from their order history.
 
-
 📖 **Live API Docs:** https://skill-marketplace-reputation-based.onrender.com/swagger-ui/index.html
-
-🌐 **Live App:** https://skill-marketplace.onrender.com
-
-🖥️ **Frontend Repo:** https://github.com/Alman8904/Skill-Marketplace-Frontend
 
 > First request may take ~30 seconds to wake up — hosted on free tier.
 
@@ -42,9 +37,10 @@ A **reputation-based freelancing platform** REST API built with Spring Boot. Con
 | API Docs | SpringDoc OpenAPI / Swagger UI 2.5 |
 | Build | Maven (Maven Wrapper included) |
 | Containerization | Docker (multi-stage build) |
+| CI/CD | GitHub Actions + Render |
 | Utilities | Lombok |
 | Testing | JUnit 5, Mockito |
-| Scheduling | Spring @Scheduled |
+| Scheduling | Spring `@Scheduled` |
 
 ---
 
@@ -54,15 +50,15 @@ A **reputation-based freelancing platform** REST API built with Spring Boot. Con
 Money moves in three steps only — authorize → capture → (or) refund. Funds are locked between authorization and delivery approval, protecting both parties.
 
 ### Abuse Protections
-- `deliveryUrl` hidden from consumer until order is COMPLETED — prevents taking work without paying
+- `deliveryUrl` hidden from consumer until order is `COMPLETED` — prevents taking work without paying
 - Refund blocked once provider has accepted — consumer cannot pull funds mid-job
 - Provider acceptance blocked until payment is authorized
 - Delivery URL validated with `@Pattern` — must start with `http://` or `https://`, cannot be blank
 
 ### Automated Expiry Scheduler
 `OrderExpiryScheduler` runs every hour and handles two stuck-money scenarios:
-- **Provider missed deadline** — order is ACCEPTED or IN_PROGRESS and deadline has passed → auto-refund consumer, cancel order
-- **Consumer ghosted after delivery** — order has been DELIVERED for more than 3 days → auto-capture payment to provider, complete order
+- **Provider missed deadline** — order is `ACCEPTED` or `IN_PROGRESS` and deadline has passed → auto-refund consumer, cancel order
+- **Consumer ghosted after delivery** — order has been `DELIVERED` for more than 3 days → auto-capture payment to provider, complete order
 
 ### Trust & Reputation System
 Scores calculated automatically from order history — no star ratings needed.
@@ -168,7 +164,7 @@ orders (N) ───────────────────────
 
 All protected endpoints require: `Authorization: Bearer <your_jwt_token>`
 
-Full interactive docs with request/response examples: `http://localhost:8080/swagger-ui.html`
+Full interactive docs: https://skill-marketplace-reputation-based.onrender.com/swagger-ui/index.html
 
 ---
 
@@ -249,8 +245,6 @@ Skills support pagination: `?page=0&size=10&sort=skillName`
 | `minExperience` | int | ❌ | Minimum years of experience |
 | `page`, `size`, `sort` | Pageable | ❌ | Default: size=10, sort=rate |
 
-> Filters are applied in the database query — pagination counts are always accurate.
-
 ---
 
 ### Orders — `/orders`
@@ -265,8 +259,6 @@ Skills support pagination: `?page=0&size=10&sort=skillName`
 | `POST` | `/orders/approve-delivery?orderId=` | `CONSUMER` | Approve delivery → releases payment atomically |
 | `GET` | `/orders/my-orders` | `CONSUMER` | Orders you placed (deliveryUrl hidden until COMPLETED) |
 | `GET` | `/orders/received-orders` | `PROVIDER` | Orders assigned to you |
-
-> A provider can only accept an order after the consumer has called `/payment/authorize`. The endpoint enforces this — it will reject acceptance if `mockPaymentStatus != AUTHORIZED`.
 
 ---
 
@@ -286,8 +278,6 @@ Skills support pagination: `?page=0&size=10&sort=skillName`
   "amount": 150.00
 }
 ```
-
-> Amount must exactly match `agreedPrice` on the order. Refund is blocked once a provider has accepted — this prevents consumers from pulling funds out mid-job.
 
 ---
 
@@ -377,17 +367,13 @@ Consumer cancels (while PENDING only)
 
 ## Security & Roles
 
-**Authentication is stateless JWT.** Login returns a plain JWT string. Send it as `Authorization: Bearer <token>` on all protected endpoints.
+Authentication is stateless JWT. Login returns a plain JWT string. Send it as `Authorization: Bearer <token>` on all protected endpoints.
 
 | Role | Permissions |
 |---|---|
 | `CONSUMER` | Place orders, authorize/refund payments (PENDING only), cancel pending orders, approve deliveries, search providers, view trust scores |
 | `PROVIDER` | List skills, accept/start/deliver orders, view received orders |
 | `ADMIN` | Create/update/delete categories and skills. Auto-created on startup via `DataInitializer`. |
-
-**CORS is pre-configured for:**
-- `http://localhost:5173` (local dev)
-- `https://skill-marketplace.onrender.com` (production)
 
 **Exception handling** is centralized in `GlobalExceptionHandler`:
 
