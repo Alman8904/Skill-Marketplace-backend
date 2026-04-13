@@ -2,7 +2,7 @@
 
 A **reputation-based freelancing platform** REST API built with Spring Boot. Consumers hire providers for specific skills, payments are held in escrow until work is approved, and every user builds a public trust profile automatically from their order history.
 
-📖 **Live API Docs:** https://skill-marketplace-reputation-based.onrender.com/swagger-ui/index.html
+📖 **Live API Docs:** https://skill-marketplace.onrender.com/swagger-ui/index.html
 
 > First request may take ~30 seconds to wake up — hosted on free tier.
 
